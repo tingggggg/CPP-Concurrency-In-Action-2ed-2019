@@ -40,6 +40,7 @@ T parallel_accumulate(Iterator first, Iterator last, T init) {
     std::vector<T> results(num_threads);
     std::vector<std::thread> threads(num_threads - 1);
 
+    // create <num> thread exclude main thread
     Iterator block_start = first;
     for (unsigned long i = 0; i < (num_threads - 1); ++i) {
         Iterator block_end = block_start;
@@ -55,8 +56,10 @@ T parallel_accumulate(Iterator first, Iterator last, T init) {
         block_start = block_end;
     }
 
+    // main thread doing
     accumulate_block<Iterator, T>()(block_start, last, results[num_threads - 1]);
 
+    // join <num> threads
     std::for_each(
         threads.begin(),
         threads.end(),
@@ -78,6 +81,11 @@ int main() {
     25 data thread 3: accumulate 50~74
     25 data main thread: accumulate 75~99
 
+    length: 100
+    max_threads: 4
+    hardware_threads: 12
+    num_threads: 4
+    block_size: 25
     */
     std::vector<int> vi;
     for (int i = 0; i < 100; ++i) {
